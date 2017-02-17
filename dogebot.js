@@ -143,6 +143,7 @@ function resetLoops() {
 	buyInterval = setInterval(function() {
 
 		var thresholdMet = false;
+		var rigs = getCount('rigs');
 
 		autoClick('upgradeextras');
 		autoClick('upgradeclicks');
@@ -154,7 +155,7 @@ function resetLoops() {
 			setThresholdLimit();
 			if (enableLogging) console.warn('[Dogebot] YOU REACHED '+locations[locationIndex]+'!!!', getTimePlayed());
 		}
-		else if (getCount('rigs') >= thresholdLimit) {
+		else if (rigs >= thresholdLimit) {
 			if (locationIndex !== waitingForIndex) {
 				var d = new Date();
 				if (enableLogging) console.warn('[Dogebot] stopped buying to get ready for '+getNextLocation()+' launch 🚀', getTimePlayed());
@@ -164,40 +165,44 @@ function resetLoops() {
 			simulateClick(launchbutton);
 			return;
 		}
-		
 
-		if (getCount('rigs') < itemThreshold / itemIncrement) {
+		if (rigs < itemThreshold / itemIncrement) {
 			autoClick('buyrig');
 		} else {
 			autoClick('upgraderigs');
 			thresholdMet = true;
 		}
 
-		if (getCount('bases') < itemThreshold) {
+		var bases = getCount('bases');
+		if (bases < itemThreshold && bases < thresholdLimit) {
 			autoClick('buybase');
 		} else {
 			autoClick('upgradebases');
 		}
 
-		if (getCount('rockets') < itemThreshold) {
+		var rockets = getCount('rockets');
+		if (rockets < itemThreshold && rockets < thresholdLimit) {
 			autoClick('buyrocket');
 		} else {
 			autoClick('upgraderockets');
 		}
 
-		if (getCount('kittens') < itemThreshold) {
+		var kittens = getCount('kittens');
+		if (kittens < itemThreshold && kittens < thresholdLimit) {
 			autoClick('buykitten');
 		} else {
 			autoClick('upgradekittens');
 		}
 
-		if (getCount('kennels') < itemThreshold + itemIncrement) {
+		var kennels = getCount('kennels');
+		if (kennels < itemThreshold + itemIncrement && kennels < thresholdLimit) {
 			autoClick('buykennel');
 		} else {
 			autoClick('upgradekennels');
 		}
 
-		if (getCount('shibes') < itemThreshold + itemIncrement) {
+		var shibes = getCount('shibes');
+		if (shibes < itemThreshold + itemIncrement && shibes < thresholdLimit) {
 			autoClick('buyshibe');
 		} else {
 			autoClick('upgradeshibes');
