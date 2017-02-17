@@ -131,7 +131,7 @@ function resetLoops() {
 		}
 		if (flyingcoin) {
 			time = new Date().getTime();
-			if (time - lastFlyingCoinClick > 6000) {
+			if (time - lastFlyingCoinClick > 1500) {
 				simulateClick(flyingcoin);
 				counts.flyingCoins++;
 				if (enableLogging) console.warn('[Dogebot] clicked a flying coin! 💸', getTimePlayed());
@@ -146,6 +146,7 @@ function resetLoops() {
 		var thresholdMet = false;
 		var rigs = getCount('rigs');
 		var loc = getLocation();
+		var thresholdIteration = itemThreshold / itemIncrement;
 
 		autoClick('upgradeextras');
 		autoClick('upgradeclicks');
@@ -168,7 +169,7 @@ function resetLoops() {
 			return;
 		}
 
-		if (rigs < itemThreshold / itemIncrement) {
+		if (rigs < thresholdIteration) {
 			autoClick('buyrig');
 		} else {
 			autoClick('upgraderigs');
@@ -176,8 +177,8 @@ function resetLoops() {
 		}
 
 		var bases = getCount('bases');
-		var baseThreshold = (loc === 'EARTH') ? itemThresholdLimit / 2 : itemThreshold;
-		if (bases < baseThreshold && bases < itemThresholdLimit) {
+		var baseThreshold = (loc === 'EARTH') ? itemThresholdLimit / 2 * thresholdIteration : itemThresholdLimit;
+		if (bases < baseThreshold) {
 			autoClick('buybase');
 		} else {
 			autoClick('upgradebases');
