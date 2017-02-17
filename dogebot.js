@@ -9,7 +9,7 @@
 var enableLogging = true, // get messages when cool stuff happens
 	itemIncrement = 10, // increase threshold by this many
 	itemThreshold = itemIncrement, // buy things until this many
-	thresholdLimit = itemIncrement, // threshold limit is different for each planet
+	itemThresholdLimit, rigThresholdLimit, // threshold limit is different for each planet
 	buyLoopIntervalTime = 1000, // 1x/second
 	mineLoopIntervalTime = 100, // 10x/second
 	buyInterval, mineInterval,
@@ -89,16 +89,17 @@ function stopLoops() {
 }
 function setThresholdLimit() {
 	var loc = getLocation();
+	itemThresholdLimit = itemIncrement * itemIncrement;
 	switch (loc) {
 		case 'EARTH':
 		case 'MOON':
-			thresholdLimit = itemIncrement;
+			rigThresholdLimit = itemIncrement;
 			break;
 		case 'MARS':
-			thresholdLimit = itemIncrement * itemIncrement;
+			rigThresholdLimit = itemIncrement * itemIncrement;
 			break;
 		default:
-			thresholdLimit = itemIncrement * itemIncrement * itemIncrement;
+			rigThresholdLimit = itemIncrement * itemIncrement * itemIncrement;
 			break;
 	}
 }
@@ -144,18 +145,19 @@ function resetLoops() {
 
 		var thresholdMet = false;
 		var rigs = getCount('rigs');
+		var loc = getLocation();
 
 		autoClick('upgradeextras');
 		autoClick('upgradeclicks');
 
-		if (getLocation() === getNextLocation()) {
+		if (loc === getNextLocation()) {
 			locationIndex++;
 			itemThreshold = itemIncrement;
 			resetCounts();
 			setThresholdLimit();
 			if (enableLogging) console.warn('[Dogebot] YOU REACHED '+locations[locationIndex]+'!!!', getTimePlayed());
 		}
-		else if (rigs >= thresholdLimit) {
+		else if (rigs >= rigThresholdLimit) {
 			if (locationIndex !== waitingForIndex) {
 				var d = new Date();
 				if (enableLogging) console.warn('[Dogebot] stopped buying to get ready for '+getNextLocation()+' launch 🚀', getTimePlayed());
@@ -174,35 +176,36 @@ function resetLoops() {
 		}
 
 		var bases = getCount('bases');
-		if (bases < itemThreshold && bases < thresholdLimit) {
+		var baseThreshold = (loc === 'EARTH') ? itemThresholdLimit / 2 : itemThreshold;
+		if (bases < baseThreshold && bases < itemThresholdLimit) {
 			autoClick('buybase');
 		} else {
 			autoClick('upgradebases');
 		}
 
 		var rockets = getCount('rockets');
-		if (rockets < itemThreshold && rockets < thresholdLimit) {
+		if (rockets < itemThreshold && rockets < itemThresholdLimit) {
 			autoClick('buyrocket');
 		} else {
 			autoClick('upgraderockets');
 		}
 
 		var kittens = getCount('kittens');
-		if (kittens < itemThreshold && kittens < thresholdLimit) {
+		if (kittens < itemThreshold && kittens < itemThresholdLimit) {
 			autoClick('buykitten');
 		} else {
 			autoClick('upgradekittens');
 		}
 
 		var kennels = getCount('kennels');
-		if (kennels < itemThreshold + itemIncrement && kennels < thresholdLimit) {
+		if (kennels < itemThreshold + itemIncrement && kennels < itemThresholdLimit) {
 			autoClick('buykennel');
 		} else {
 			autoClick('upgradekennels');
 		}
 
 		var shibes = getCount('shibes');
-		if (shibes < itemThreshold + itemIncrement && shibes < thresholdLimit) {
+		if (shibes < itemThreshold + itemIncrement && shibes < itemThresholdLimit) {
 			autoClick('buyshibe');
 		} else {
 			autoClick('upgradeshibes');
