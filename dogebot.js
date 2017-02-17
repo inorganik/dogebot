@@ -191,13 +191,13 @@ function resetLoops() {
 			autoClick('upgradekittens');
 		}
 
-		if (getCount('kennels') < itemThreshold + (itemIncrement * (itemThreshold / itemIncrement)/2/2)) {
+		if (getCount('kennels') < itemThreshold + itemIncrement) {
 			autoClick('buykennel');
 		} else {
 			autoClick('upgradekennels');
 		}
 
-		if (getCount('shibes') < itemThreshold + (itemIncrement * (itemThreshold / itemIncrement)/2)) {
+		if (getCount('shibes') < itemThreshold + itemIncrement) {
 			autoClick('buyshibe');
 		} else {
 			autoClick('upgradeshibes');
