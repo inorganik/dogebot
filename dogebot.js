@@ -9,9 +9,9 @@
 var enableLogging = true, // get messages when cool stuff happens
 	itemIncrement = 10, // increase threshold by this many
 	itemThreshold = itemIncrement, // buy things until this many
-	itemThresholdLimit, rigThresholdLimit, // threshold limit is different for each planet
 	buyLoopIntervalTime = 1000, // 1x/second
 	mineLoopIntervalTime = 100, // 10x/second
+	itemThresholdLimit, rigThresholdLimit, rigThreshold, maxThresholdLevelReached,
 	buyInterval, mineInterval,
 	miner = document.getElementById('miner'),
 	counts = {
@@ -22,7 +22,8 @@ var enableLogging = true, // get messages when cool stuff happens
 	lastFlyingCoinClick = 0,
 	locations = ['EARTH', 'MOON', 'MARS', '????(4)', '????(5)', '????(6)'],
 	locationIndex = 0,
-	waitingForIndex = -1;
+	waitingForIndex = -1,
+	loggedFinalThreshold = false;
 
 function getLocation() {
 	var loc = document.getElementById('location');
@@ -68,6 +69,7 @@ function resetCounts() {
 	for (var key in counts) {
 		counts[key] = 0;
 	}
+	loggedFinalThreshold = false;
 }
 function simulateClick(el) {
 	if (el) {
@@ -96,7 +98,7 @@ function setThresholdLimit() {
 			rigThresholdLimit = itemIncrement;
 			break;
 		case 'MARS':
-			rigThresholdLimit = Math.pow(itemIncrement, 2);
+			rigThresholdLimit = Math.pow(itemIncrement, 3) / 2;
 			break;
 		default:
 			rigThresholdLimit = Math.pow(itemIncrement, 3);
@@ -145,8 +147,8 @@ function resetLoops() {
 		var thresholdMet = false,
 			rigs = getCount('rigs'),
 			loc = getLocation(),
-			thresholdIteration = itemThreshold / itemIncrement,
-			maxThresholdLevelReached = (thresholdIteration === itemIncrement);
+			thresholdIteration = itemThreshold / itemIncrement;
+		maxThresholdLevelReached = (thresholdIteration === itemIncrement);
 
 		autoClick('upgradeextras');
 		autoClick('upgradeclicks');
@@ -172,12 +174,20 @@ function resetLoops() {
 			return;
 		}
 
-		var rigThreshold = (maxThresholdLevelReached) ? rigThresholdLimit : thresholdIteration;
+		if (maxThresholdLevelReached) {
+			rigThreshold = rigThresholdLimit;
+			if (!loggedFinalThreshold) {
+				if (enableLogging) console.warn('[Dogebot] upped the threshold to the highest level! 🆙', thresholdIteration, getTimePlayed());
+				loggedFinalThreshold = true;
+			}
+		} else {
+			rigThreshold = thresholdIteration;
+			if (rigs >= thresholdIteration) thresholdMet = true;
+		}
 		if (rigs < rigThreshold) {
 			autoClick('buyrig');
 		} else {
 			autoClick('upgraderigs');
-			thresholdMet = true;
 		}
 
 		var bases = getCount('bases');
@@ -217,9 +227,9 @@ function resetLoops() {
 		}
 
 		// up item threshhold if all items have reached threshhold
-		if (thresholdMet) {
+		if (thresholdMet && !maxThresholdLevelReached) {
 			itemThreshold += itemIncrement;
-			if (enableLogging) console.warn('[Dogebot] upped the threshhold level! 🆙', thresholdIteration, getTimePlayed());
+			if (enableLogging) console.warn('[Dogebot] upped the threshold level! 🆙', thresholdIteration, getTimePlayed());
 		}
 
 	}, buyLoopIntervalTime);
