@@ -7,8 +7,9 @@
 // paste this code into the console at dogeminer.se
 
 var enableLogging = true, // get messages when cool stuff happens
-	itemIncrement = 10, // increase threshhold by this many
-	itemThreshhold = itemIncrement, // buy things until this many
+	itemIncrement = 10, // increase threshold by this many
+	itemThreshold = itemIncrement, // buy things until this many
+	thresholdLimit = itemIncrement, // threshold limit is different for each planet
 	buyLoopIntervalTime = 1000, // 1x/second
 	mineLoopIntervalTime = 100, // 10x/second
 	buyInterval, mineInterval,
@@ -17,7 +18,6 @@ var enableLogging = true, // get messages when cool stuff happens
 		bonusCoins:0,
 		flyingCoins:0
 	},
-	upgrades = {},
 	lastBonusCoinClick = 0,
 	lastFlyingCoinClick = 0,
 	locations = ['EARTH', 'MOON', 'MARS'],
@@ -36,7 +36,9 @@ function getNextLocation() {
 	}
 }
 locationIndex = locations.indexOf(getLocation());
-
+function getTimePlayed() {
+	return document.getElementById('timeplayed').textContent;
+}
 function mapActionToCount(action) {
 	if ((/shibe/).test(action)) return 'shibes';
 	if ((/kennel/).test(action)) return 'kennels';
@@ -58,61 +60,56 @@ function parseCount(what) {
 	}
 }
 function getCount(what) {
-	if (!counts[what]) {
-		counts[what] = parseCount(what);
-		return counts[what];
-	} else {
-		return counts[what];
-	}
+	var amount = parseCount(what);
+	counts[what] = amount;
+	return amount;
 }
 function resetCounts() {
 	for (var key in counts) {
 		counts[key] = 0;
 	}
 }
-function incCount(what) {
-	if (!counts[what]) counts[what] = parseCount(what);
-	counts[what]++;
-}
-function incUpgrade(what) {
-	if (!upgrades[what]) {
-		upgrades[what] = 0;
-	} else {
-		upgrades[what]++;
-	}
-}
 function simulateClick(el) {
 	if (el) {
-		el.click();
-		el.dispatchEvent(new Event('mousedown'));
+		$(el).trigger('mousedown');
 		setTimeout(function() {
-			el.dispatchEvent(new Event('mouseup'));
+			$(el).trigger('mouseup');
 		}, 10);
 	}
 }
 function autoClick(what) {
-
 	var btn = document.getElementById(what);
 	if (btn && !btn.getAttribute('disabled')) {
-		simulateClick(btn);
-		if ((/upgrade/).test(what)) {
-			incUpgrade(mapActionToCount(what));
-		} else {
-			incCount(mapActionToCount(what));
-		}
+		$(btn).trigger('click');
 	}
 }
 function stopLoops() {
 	clearInterval(buyInterval);
 	clearInterval(mineInterval);
 }
-
+function setThresholdLimit() {
+	var loc = getLocation();
+	switch (loc) {
+		case 'EARTH':
+		case 'MOON':
+			thresholdLimit = itemIncrement;
+			break;
+		case 'MARS':
+			thresholdLimit = itemIncrement * itemIncrement;
+			break;
+		default:
+			thresholdLimit = itemIncrement * itemIncrement * itemIncrement;
+			break;
+	}
+}
 
 function resetLoops() {
 	stopLoops();
 	resetCounts();
 
-	if (enableLogging) console.warn('[Dogebot] loops started! hold on to your butts 🚬');
+	setThresholdLimit();
+
+	if (enableLogging) console.warn('[Dogebot] Dogebot started! hold on to your butts 🚬', getTimePlayed());
 
 	// mining loop
 	mineInterval = setInterval(function() {
@@ -125,22 +122,18 @@ function resetLoops() {
 		if (bonuscoin) {
 			time = new Date().getTime();
 			if (time - lastBonusCoinClick > 6000) {
-				setTimeout(function() {
-					bonuscoin.dispatchEvent(new Event('mousedown'));
-				}, 500);
+				simulateClick(bonuscoin);
 				counts.bonusCoins++;
-				if (enableLogging) console.warn('[Dogebot] clicked a bonus coin! 🤑');
+				if (enableLogging) console.warn('[Dogebot] clicked a bonus coin! 🤑', getTimePlayed());
 				lastBonusCoinClick = time;
 			}
 		}
 		if (flyingcoin) {
 			time = new Date().getTime();
 			if (time - lastFlyingCoinClick > 6000) {
-				setTimeout(function() {
-					flyingcoin.dispatchEvent(new Event('mousedown'));
-				}, 500);
+				simulateClick(flyingcoin);
 				counts.flyingCoins++;
-				if (enableLogging) console.warn('[Dogebot] clicked a flying coin! 💸');
+				if (enableLogging) console.warn('[Dogebot] clicked a flying coin! 💸', getTimePlayed());
 				lastFlyingCoinClick = time;
 			}
 		}
@@ -149,21 +142,22 @@ function resetLoops() {
 	// buy/upgrade loop
 	buyInterval = setInterval(function() {
 
-		var threshholdMet = false;
+		var thresholdMet = false;
 
 		autoClick('upgradeextras');
 		autoClick('upgradeclicks');
 
 		if (getLocation() === getNextLocation()) {
 			locationIndex++;
-			itemThreshhold = itemIncrement;
+			itemThreshold = itemIncrement;
 			resetCounts();
-			if (enableLogging) console.warn('[Dogebot] YOU REACHED '+locations[locationIndex]+'!!!');
+			setThresholdLimit();
+			if (enableLogging) console.warn('[Dogebot] YOU REACHED '+locations[locationIndex]+'!!!', getTimePlayed());
 		}
-		else if (getCount('rigs') >= itemIncrement) {
+		else if (getCount('rigs') >= thresholdLimit) {
 			if (locationIndex !== waitingForIndex) {
 				var d = new Date();
-				if (enableLogging) console.warn('[Dogebot] stopped buying to get ready for '+getNextLocation()+' launch 🚀', d);
+				if (enableLogging) console.warn('[Dogebot] stopped buying to get ready for '+getNextLocation()+' launch 🚀', getTimePlayed());
 				waitingForIndex = locationIndex;
 			}
 			var launchbutton = document.getElementById('launchbutton');
@@ -172,47 +166,47 @@ function resetLoops() {
 		}
 		
 
-		if (getCount('rigs') < itemThreshhold/itemIncrement) {
+		if (getCount('rigs') < itemThreshold / itemIncrement) {
 			autoClick('buyrig');
 		} else {
 			autoClick('upgraderigs');
-			threshholdMet = true;
+			thresholdMet = true;
 		}
 
-		if (getCount('bases') < itemThreshhold * 2) {
+		if (getCount('bases') < itemThreshold) {
 			autoClick('buybase');
 		} else {
 			autoClick('upgradebases');
 		}
 
-		if (getCount('rockets') < itemThreshhold) {
+		if (getCount('rockets') < itemThreshold) {
 			autoClick('buyrocket');
 		} else {
 			autoClick('upgraderockets');
 		}
 
-		if (getCount('kittens') < itemThreshhold) {
+		if (getCount('kittens') < itemThreshold) {
 			autoClick('buykitten');
 		} else {
 			autoClick('upgradekittens');
 		}
 
-		if (getCount('kennels') < itemThreshhold * 1.5) {
+		if (getCount('kennels') < itemThreshold + (itemIncrement * (itemThreshold / itemIncrement)/2/2)) {
 			autoClick('buykennel');
 		} else {
 			autoClick('upgradekennels');
 		}
 
-		if (getCount('shibes') < itemThreshhold * 2) {
+		if (getCount('shibes') < itemThreshold + (itemIncrement * (itemThreshold / itemIncrement)/2)) {
 			autoClick('buyshibe');
 		} else {
 			autoClick('upgradeshibes');
 		}
 
 		// up item threshhold if all items have reached threshhold
-		if (threshholdMet) {
-			itemThreshhold += itemIncrement;
-			if (enableLogging) console.warn('[Dogebot] upped the threshhold! 🆙', itemThreshhold);
+		if (thresholdMet) {
+			itemThreshold += itemIncrement;
+			if (enableLogging) console.warn('[Dogebot] upped the threshhold! 🆙', itemThreshold, getTimePlayed());
 		}
 
 	}, buyLoopIntervalTime);
