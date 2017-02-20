@@ -11,19 +11,12 @@ var enableLogging = true, // get messages when cool stuff happens
 	itemThreshold = itemIncrement, // buy things until this many
 	buyLoopIntervalTime = 1000, // 1x/second
 	mineLoopIntervalTime = 100, // 10x/second
-	itemThresholdLimit, rigThresholdLimit, rigThreshold, maxThresholdLevelReached,
-	buyInterval, mineInterval,
 	miner = document.getElementById('miner'),
-	counts = {
-		bonusCoins:0,
-		flyingCoins:0
-	},
-	lastBonusCoinClick = 0,
-	lastFlyingCoinClick = 0,
+	itemThresholdLimit, thresholdIteration, rigThresholdLimit, rigThreshold, baseThreshold, maxThresholdLevelReached,
+	buyInterval, mineInterval, pollInterval, coinsLastHour = [], coinsPerSecLastHour = [], increasesInCoinsPerSec = [0],
+	counts = {}, lastBonusCoinClick = 0, lastFlyingCoinClick = 0,
 	locations = ['EARTH', 'MOON', 'MARS', '????(4)', '????(5)', '????(6)'],
-	locationIndex = 0,
-	waitingForIndex = -1,
-	loggedFinalThreshold = false;
+	locationIndex = 0, waitingForIndex = -1, loggedFinalThreshold = false;
 
 function getLocation() {
 	var loc = document.getElementById('location');
@@ -94,14 +87,20 @@ function setThresholdLimit() {
 	itemThresholdLimit = itemIncrement * itemIncrement;
 	switch (loc) {
 		case 'EARTH':
+			rigThresholdLimit = itemIncrement;
+			baseThreshold = itemThresholdLimit / 2 * thresholdIteration;
+			break;
 		case 'MOON':
 			rigThresholdLimit = itemIncrement;
+			baseThreshold = itemThresholdLimit / 2;
 			break;
 		case 'MARS':
 			rigThresholdLimit = Math.pow(itemIncrement, 3) / 2;
+			baseThreshold = itemThresholdLimit;
 			break;
 		default:
 			rigThresholdLimit = Math.pow(itemIncrement, 3);
+			baseThreshold = itemThresholdLimit;
 			break;
 	}
 }
@@ -110,6 +109,7 @@ function resetLoops() {
 	stopLoops();
 	resetCounts();
 	setThresholdLimit();
+	increasesInCoinsPerSec = [0];
 
 	if (enableLogging) console.warn('[Dogebot] started! hold on to your butts 🚬', getTimePlayed());
 
@@ -125,16 +125,14 @@ function resetLoops() {
 			time = new Date().getTime();
 			if (time - lastBonusCoinClick > 6000) {
 				simulateClick(bonuscoin);
-				counts.bonusCoins++;
 				if (enableLogging) console.warn('[Dogebot] clicked a bonus coin! 🤑', getTimePlayed());
 				lastBonusCoinClick = time;
 			}
 		}
 		if (flyingcoin) {
 			time = new Date().getTime();
-			if (time - lastFlyingCoinClick > 1400) {
+			if (time - lastFlyingCoinClick > 1000) {
 				simulateClick(flyingcoin);
-				counts.flyingCoins++;
 				if (enableLogging) console.warn('[Dogebot] clicked a flying coin! 💸', getTimePlayed());
 				lastFlyingCoinClick = time;
 			}
@@ -146,12 +144,15 @@ function resetLoops() {
 
 		var thresholdMet = false,
 			rigs = getCount('rigs'),
-			loc = getLocation(),
-			thresholdIteration = itemThreshold / itemIncrement;
+			loc = getLocation();
+		thresholdIteration = itemThreshold / itemIncrement;
 		maxThresholdLevelReached = (thresholdIteration === itemIncrement);
 
 		autoClick('upgradeextras');
 		autoClick('upgradeclicks');
+		if (rigs > 0) {
+			autoClick('upgraderigs');
+		}
 
 		if (loc === getNextLocation()) {
 			locationIndex++;
@@ -186,12 +187,9 @@ function resetLoops() {
 		}
 		if (rigs < rigThreshold) {
 			autoClick('buyrig');
-		} else {
-			autoClick('upgraderigs');
 		}
 
 		var bases = getCount('bases');
-		var baseThreshold = (loc === 'EARTH') ? itemThresholdLimit / 2 * thresholdIteration : itemThresholdLimit;
 		if (bases < baseThreshold) {
 			autoClick('buybase');
 		} else {
@@ -233,5 +231,25 @@ function resetLoops() {
 		}
 
 	}, buyLoopIntervalTime);
+
+	// polling loop for coins and coins/sec counts
+	pollInterval = setInterval(function() {
+		var coins = getCount('mined');
+		coinsLastHour.push(coins);
+		if (coinsLastHour.length > 60) coinsLastHour.shift();
+		
+		var persec = getCount('persec');
+		coinsPerSecLastHour.push(persec);
+		if (coinsPerSecLastHour.length > 60) coinsPerSecLastHour.shift();
+
+		var lastMinuteIncrease = persec - increasesInCoinsPerSec[increasesInCoinsPerSec.length - 1];
+		increasesInCoinsPerSec.push(lastMinuteIncrease);
+		if (increasesInCoinsPerSec.length > 60) increasesInCoinsPerSec.shift();
+
+		if (pollInterval % 60 === 0 && enableLogging && console.chart !== undefined) {
+			console.warn('[Dogebot] increase in dogecoins per second over the last hour: 📈', getTimePlayed());
+			console.chart(increasesInCoinsPerSec, {color:'gray'});
+		}
+	}, 60000);
 }
 resetLoops();
