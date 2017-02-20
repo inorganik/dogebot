@@ -13,7 +13,7 @@ var enableLogging = true, // get messages when cool stuff happens
 	mineLoopIntervalTime = 100, // 10x/second
 	miner = document.getElementById('miner'),
 	itemThresholdLimit, thresholdIteration, rigThresholdLimit, rigThreshold, baseThreshold, maxThresholdLevelReached,
-	buyInterval, mineInterval, pollInterval, coinsLastHour = [], coinsPerSecLastHour = [], increasesInCoinsPerSec = [0],
+	buyInterval, mineInterval, pollInterval, coinsLastHour = [], coinsPerSecLastHour = [0], increasesInCoinsPerSec = [],
 	counts = {}, lastBonusCoinClick = 0, lastFlyingCoinClick = 0,
 	locations = ['EARTH', 'MOON', 'MARS', '????(4)', '????(5)', '????(6)'],
 	locationIndex = 0, waitingForIndex = -1, loggedFinalThreshold = false;
@@ -109,7 +109,6 @@ function resetLoops() {
 	stopLoops();
 	resetCounts();
 	setThresholdLimit();
-	increasesInCoinsPerSec = [0];
 
 	if (enableLogging) console.warn('[Dogebot] started! hold on to your butts 🚬', getTimePlayed());
 
@@ -237,12 +236,12 @@ function resetLoops() {
 		var coins = getCount('mined');
 		coinsLastHour.push(coins);
 		if (coinsLastHour.length > 60) coinsLastHour.shift();
-		
+
 		var persec = getCount('persec');
 		coinsPerSecLastHour.push(persec);
 		if (coinsPerSecLastHour.length > 60) coinsPerSecLastHour.shift();
 
-		var lastMinuteIncrease = persec - increasesInCoinsPerSec[increasesInCoinsPerSec.length - 1];
+		var lastMinuteIncrease = persec - coinsPerSecLastHour[coinsPerSecLastHour.length - 1];
 		increasesInCoinsPerSec.push(lastMinuteIncrease);
 		if (increasesInCoinsPerSec.length > 60) increasesInCoinsPerSec.shift();
 
