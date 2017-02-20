@@ -14,7 +14,7 @@ Leave the browser tab open, and check the console periodically. Dogebot will lea
 If you accidentally close or reload the tab, don't worry, dogeminer saves your progress. Just repeat the instructions above to restart Dogebot. 
 
 ### Secure
-Dogebot **does not** make any ajax requests, or inject any additional scripts on the page besides the one for `console.charts()`. Take a look at dogebot.js and see for yourself. It simply does the clicking for you, and keeps track of your progress.
+Dogebot **does not** make any ajax requests, or inject any additional scripts on the page besides the one for [console.charts](https://github.com/MAKIO135/console.chart) (a very cool project!). Take a look at dogebot.js and see for yourself. It simply does the clicking for you, and keeps track of your progress.
 
 ### What it does
 Dogebot uses several loops to mine and purchase upgrades and helpers. One loop is used simulate a click on your shibe 10 times per second, non-stop, indefinitely. It uses a second loop to buy helpers and upgrades, which runs once per second. A third polls certain counts and keeps track of progress.
