@@ -18,6 +18,12 @@ var enableLogging = true, // get messages when cool stuff happens
 	locations = ['EARTH', 'MOON', 'MARS', '????(4)', '????(5)', '????(6)'],
 	locationIndex = 0, waitingForIndex = -1, loggedFinalThreshold = false;
 
+// for console.charts functionality
+var charts = document.createElement('script');
+charts.setAttribute('charset', 'utf-8');
+charts.setAttribute('src', 'https://rawgit.com/inorganik/console.chart/master/console.chart.js');
+document.body.appendChild(charts);
+
 function getLocation() {
 	var loc = document.getElementById('location');
 	return loc.children[0].textContent;
@@ -268,7 +274,7 @@ function resetLoops() {
 				console.warn('[Dogebot] increase in dogecoins per second over the last hour: 📈', getTimePlayed());
 				console.chart(increasesInCoinsPerSec, {color:'gray'});
 			}
-		}, 30000);
+		}, 60000);
 	}, 500);
 }
 resetLoops();

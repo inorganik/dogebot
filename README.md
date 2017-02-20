@@ -2,17 +2,7 @@
 auto-mine dogecoin at dogeminer.se
 
 ### Instructions for use:
-1. Copy the script below:
-``` js
-function inject(s) {
-var t = document.createElement('script');
-t.setAttribute('charset', 'utf-8');
-t.setAttribute('src', s); ;
-document.body.appendChild(t);}
-inject('https://rawgit.com/inorganik/console.chart/master/console.chart.js');
-inject('https://rawgit.com/inorganik/dogebot/master/dogebot.min.js');
-
-```
+1. Copy the contents of dogebot.min.js
 2. Paste into your console on dogeminer.se (to open: cmd + opt + i in Safari and Chrome, cmd + opt + k in Firefox)
 3. Dogebot starts working immediately. Such mine! So bot!
 
@@ -24,7 +14,7 @@ Leave the browser tab open, and check the console periodically. Dogebot will lea
 If you accidentally close or reload the tab, don't worry, dogeminer saves your progress. Just repeat the instructions above to restart Dogebot. 
 
 ### Secure
-Dogebot **does not** make any ajax requests, or inject any additional scripts on the page. Take a look at dogebot.js and see for yourself. It simply does the clicking for you, and gives you analytics.
+Dogebot **does not** make any ajax requests, or inject any additional scripts on the page besides the one for `console.charts()`. Take a look at dogebot.js and see for yourself. It simply does the clicking for you, and keeps track of your progress.
 
 ### What it does
 Dogebot uses several loops to mine and purchase upgrades and helpers. One loop is used simulate a click on your shibe 10 times per second, non-stop, indefinitely. It uses a second loop to buy helpers and upgrades, which runs once per second. A third polls certain counts and keeps track of progress.
