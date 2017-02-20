@@ -245,12 +245,10 @@ function resetLoops() {
 		var coins = getCoinCount('mined');
 		coinsLastHour.push(coins);
 		if (coinsLastHour.length > 60) coinsLastHour.shift();
-
 		var persec = getCoinCount('persec');
+		var lastMinuteIncrease = persec - coinsPerSecLastHour[coinsPerSecLastHour.length - 1];
 		coinsPerSecLastHour.push(persec);
 		if (coinsPerSecLastHour.length > 60) coinsPerSecLastHour.shift();
-
-		var lastMinuteIncrease = persec - coinsPerSecLastHour[coinsPerSecLastHour.length - 1];
 		increasesInCoinsPerSec.push(lastMinuteIncrease);
 		if (increasesInCoinsPerSec.length > 60) increasesInCoinsPerSec.shift();
 
