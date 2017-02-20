@@ -89,6 +89,7 @@ function autoClick(what) {
 function stopLoops() {
 	clearInterval(buyInterval);
 	clearInterval(mineInterval);
+	clearInterval(pollInterval);
 }
 function setThresholdLimit() {
 	var loc = getLocation();
