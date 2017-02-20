@@ -37,14 +37,13 @@ In addition, Dogebot clicks bonus and flying coins! When flying coins come, Doge
 Dogebot gets to Mars in just under 8 hrs. To get to the next planet after Mars it costs 1,000,000,000,000,000,000,000 Trillion dogecoins. Which means that even after you are making 1,000,000,000,000 Trillion dogecoins per second, it would take 11,574,074 days to reach the launch cost. That means you have to let Dogebot keep working for ? days until the next planet.
 
 ### Things you can do <a name="functions"></a>
-There are a couple commands you can run from the console:
+Here are some commands you can run from the console:
 - `stopLoops()` - stops Dogebot.
 - `resetLoops()` - starts Dogebot.
-- `coinsLastHour` - an array of your available coin balance recorded each minute over the last hour
-- `console.chart(coinsLastHour)` - a chart of your coin balance over the last hour
-- `coinsPerSecLastHour` - an array of your coins per second recorded each minute over the last hour
-- `console.chart(coinsPerSecLastHour)` - view a chart of your coins/second over the last hour
-- `increasesInCoinsPerSec` an array of how much your coins per second are increasing each minute over the last hour
-- `console.chart(increasesInCoinsPerSec)` - see a chart of how much your coins/second are increasing each minute over the last hour
+- `console.chart()` - pass any of the following arrays to this function to see a chart of your progress!
+	- `coinsLastHour` - an array of your available coin balance recorded each minute over the last hour
+	- `coinsPerSecLastHour` - an array of your coins per second recorded each minute over the last hour
+	- `increasesInCoinsPerSec` an array of how much your coins per second are increasing each minute over the last hour
+
 
 
