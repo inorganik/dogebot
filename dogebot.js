@@ -13,7 +13,7 @@ var enableLogging = true, // get messages when cool stuff happens
 	mineLoopIntervalTime = 100, // 10x/second
 	miner = document.getElementById('miner'),
 	itemThresholdLimit, thresholdIteration, rigThresholdLimit, rigThreshold, baseThreshold, maxThresholdLevelReached,
-	buyInterval, mineInterval, pollInterval, coinsLastHour = [], coinsPerSecLastHour = [0], increasesInCoinsPerSec = [],
+	buyInterval, mineInterval, pollInterval, coinsLastHour = [], coinsPerSecLastHour = [], increasesInCoinsPerSec = [], lastPerSec = 0,
 	counts = {}, lastBonusCoinClick = 0, lastFlyingCoinClick = 0,
 	locations = ['EARTH', 'MOON', 'MARS', '????(4)', '????(5)', '????(6)'],
 	locationIndex = 0, waitingForIndex = -1, loggedFinalThreshold = false;
@@ -240,22 +240,27 @@ function resetLoops() {
 
 	}, buyLoopIntervalTime);
 
-	// polling loop for coins and coins/sec counts
-	pollInterval = setInterval(function() {
-		var coins = getCoinCount('mined');
-		coinsLastHour.push(coins);
-		if (coinsLastHour.length > 60) coinsLastHour.shift();
-		var persec = getCoinCount('persec');
-		var lastMinuteIncrease = persec - coinsPerSecLastHour[coinsPerSecLastHour.length - 1];
-		coinsPerSecLastHour.push(persec);
-		if (coinsPerSecLastHour.length > 60) coinsPerSecLastHour.shift();
-		increasesInCoinsPerSec.push(lastMinuteIncrease);
-		if (increasesInCoinsPerSec.length > 60) increasesInCoinsPerSec.shift();
+	// polling loop for coins and coins/sec counts - offset
+	setTimeout(function() {
+		pollInterval = setInterval(function() {
+			var coins = getCoinCount('mined');
+			var persec = getCoinCount('persec');
+			var lastMinuteIncrease = Math.max(0, persec - lastPerSec);
 
-		if (pollInterval % 60 === 0 && enableLogging && console.chart !== undefined) {
-			console.warn('[Dogebot] increase in dogecoins per second over the last hour: 📈', getTimePlayed());
-			console.chart(increasesInCoinsPerSec, {color:'gray'});
-		}
-	}, 60000);
+			coinsLastHour.push(coins);
+			increasesInCoinsPerSec.push(lastMinuteIncrease);
+			coinsPerSecLastHour.push(persec);
+
+			if (coinsLastHour.length > 60) coinsLastHour.shift();
+			if (coinsPerSecLastHour.length > 60) coinsPerSecLastHour.shift();
+			if (increasesInCoinsPerSec.length > 60) increasesInCoinsPerSec.shift();
+			lastPerSec = persec;
+
+			if (pollInterval % 60 === 0 && enableLogging && console.chart !== undefined) {
+				console.warn('[Dogebot] increase in dogecoins per second over the last hour: 📈', getTimePlayed());
+				console.chart(increasesInCoinsPerSec, {color:'gray'});
+			}
+		}, 30000);
+	}, 500);
 }
 resetLoops();
