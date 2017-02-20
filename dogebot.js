@@ -58,10 +58,18 @@ function getCount(what) {
 	counts[what] = amount;
 	return amount;
 }
-function getCoinCount(what) {
-	var whats = document.getElementById(what);
-	if (whats && whats.children[0] && whats.children[0].textContent.replace(/\D+/g, '').length) {
-		return parseInt(whats.textContent.replace(/\D+/g, ''));
+function getCoinCount() {
+	var coins = document.getElementById('mined');
+	if (coins && coins.children[0] && coins.children[0].textContent.replace(/\D+/g, '').length) {
+		return parseInt(coins.textContent.replace(/\D+/g, ''));
+	} else {
+		return 0;
+	}
+}
+function getCoinsPerSec() {
+	var coins = $('.mined-persec').children().text();
+	if (coins && coins.replace(/[a-z\s\,]+/gi, '').length) {
+		return parseFloat(coins.replace(/[a-z\s\,]+/gi, ''));
 	} else {
 		return 0;
 	}
@@ -243,8 +251,8 @@ function resetLoops() {
 	// polling loop for coins and coins/sec counts - offset
 	setTimeout(function() {
 		pollInterval = setInterval(function() {
-			var coins = getCoinCount('mined');
-			var persec = getCoinCount('persec');
+			var coins = getCoinCount();
+			var persec = getCoinsPerSec();
 			var lastMinuteIncrease = Math.max(0, persec - lastPerSec);
 
 			coinsLastHour.push(coins);
