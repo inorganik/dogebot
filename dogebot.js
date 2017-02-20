@@ -13,7 +13,7 @@ var enableLogging = true, // get messages when cool stuff happens
 	mineLoopIntervalTime = 100, // 10x/second
 	miner = document.getElementById('miner'),
 	itemThresholdLimit, thresholdIteration, rigThresholdLimit, rigThreshold, baseThreshold, maxThresholdLevelReached,
-	buyInterval, mineInterval, pollInterval, coinsLastHour = [], coinsPerSecLastHour = [], increasesInCoinsPerSec = [], lastPerSec = 0,
+	buyInterval, mineInterval, pollInterval, coinsLastHour = [], coinsPerSecLastHour = [], increasesInCoinsPerSec = [], lastPerSec = -1,
 	counts = {}, lastBonusCoinClick = 0, lastFlyingCoinClick = 0,
 	locations = ['EARTH', 'MOON', 'MARS', '????(4)', '????(5)', '????(6)'],
 	locationIndex = 0, waitingForIndex = -1, loggedFinalThreshold = false;
@@ -256,7 +256,7 @@ function resetLoops() {
 			var lastMinuteIncrease = Math.max(0, persec - lastPerSec);
 
 			coinsLastHour.push(coins);
-			increasesInCoinsPerSec.push(lastMinuteIncrease);
+			if (lastPerSec >= 0) increasesInCoinsPerSec.push(lastMinuteIncrease);
 			coinsPerSecLastHour.push(persec);
 
 			if (coinsLastHour.length > 60) coinsLastHour.shift();
