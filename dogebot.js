@@ -58,6 +58,14 @@ function getCount(what) {
 	counts[what] = amount;
 	return amount;
 }
+function getCoinCount(what) {
+	var whats = document.getElementById(what);
+	if (whats && whats.children[0] && whats.children[0].textContent.replace(/\D+/g, '').length) {
+		return parseInt(whats.textContent.replace(/\D+/g, ''));
+	} else {
+		return 0;
+	}
+}
 function resetCounts() {
 	for (var key in counts) {
 		counts[key] = 0;
@@ -233,11 +241,11 @@ function resetLoops() {
 
 	// polling loop for coins and coins/sec counts
 	pollInterval = setInterval(function() {
-		var coins = getCount('mined');
+		var coins = getCoinCount('mined');
 		coinsLastHour.push(coins);
 		if (coinsLastHour.length > 60) coinsLastHour.shift();
 
-		var persec = getCount('persec');
+		var persec = getCoinCount('persec');
 		coinsPerSecLastHour.push(persec);
 		if (coinsPerSecLastHour.length > 60) coinsPerSecLastHour.shift();
 
